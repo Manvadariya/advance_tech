@@ -20,14 +20,21 @@ for path in pathList:
 # print(studentIds)
 
 # Finding encoding of face
-def findEncodings(imgeList):
+def findEncodings(imgList):
     encodList = []
-    for img in imgeList:
+    for img in imgList:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        encod = face_recognition.face_encodings(img)[0]
-        encodList.append(encod)
+        face_encodings = face_recognition.face_encodings(img)
+
+        if len(face_encodings) > 0:
+            encod = face_encodings[0]
+            encodList.append(encod)
+        else:
+            print(f"No face found in {img}")
+            # You might want to handle this case, depending on your requirements.
 
     return encodList
+
 
 print("Start Encodings")
 encodeListKnown = findEncodings(imgList)

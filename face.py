@@ -80,7 +80,7 @@ while True:
 
             matchIndex = np.argmin(faceDis)
             # print(matchIndex)
-            # if find any face matches with draw border around it  
+            # if find any face matches with draw border around it
             if matches[matchIndex]:
                 # print("Face Detected")
                 # print(studentIds[matchIndex])
