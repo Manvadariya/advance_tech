@@ -1,37 +1,46 @@
-# importing necessary modules
 import cv2
 import face_recognition
-import os
 import pickle
+import os
+
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import db
+from firebase_admin import storage
+
+cred = credentials.Certificate("key.json")
+firebase_admin.initialize_app(cred,{
+    'databaseURL' : 'https://faceattendance-c7b33-default-rtdb.firebaseio.com/',
+    'storageBucket' : 'faceattendance-c7b33.appspot.com'
+})
+
 
 # Importing student images
-# NOTE :- Image size should be 216x216 and name should be id of students
 folderPath = 'Images'
 pathList = os.listdir(folderPath)
-print(pathList)
-
+# print(pathList)
 imgList = []
 studentIds = []
-
 for path in pathList:
     imgList.append(cv2.imread(os.path.join(folderPath, path)))
     studentIds.append(os.path.splitext(path)[0])
 
+    fileName = f'{folderPath}/{path}'
+    bucket = storage.bucket()
+    blob = bucket.blob(fileName)
+    blob.upload_from_filename(fileName)
+
+
+    # print(path)
+    # print(os.path.splitext(path)[0])
 # print(studentIds)
 
-# Finding encoding of face
-def findEncodings(imgList):
+def findEncodings(imgeList):
     encodList = []
-    for img in imgList:
+    for img in imgeList:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        face_encodings = face_recognition.face_encodings(img)
-
-        if len(face_encodings) > 0:
-            encod = face_encodings[0]
-            encodList.append(encod)
-        else:
-            print(f"No face found in {img}")
-            # You might want to handle this case, depending on your requirements.
+        encod = face_recognition.face_encodings(img)[0]
+        encodList.append(encod)
 
     return encodList
 
@@ -42,7 +51,6 @@ encodeListKnownWithIds = [encodeListKnown,studentIds]
 print(encodeListKnownWithIds)
 print("Done Encoding")
 
-# Storing encoding in separate file
 file = open("EncodeFiles.p", 'wb')
 pickle.dump(encodeListKnownWithIds, file)
 file.close()
