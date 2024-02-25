@@ -3,7 +3,7 @@ import math
 import cv2
 import mediapipe as mp
 from ctypes import cast, POINTER
-
+from screen_brightness_control import set_brightness, get_brightness
 import numpy as np
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
@@ -105,46 +105,50 @@ vol = 0
 volPer = 0
 area = 0
 colorVol = (255, 0, 0)
+smoothness = 5
 
 while True:
     success, img = cap.read()
 
-    # Find Hand
+    # Find Hands
     img = detector.findHands(img)
     lmList, bbox = detector.findPosition(img, draw=True)
     if len(lmList) != 0:
-
         # Filter based on size
         area = (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]) // 100
         # print(area)
         if 250 < area < 1000:
+            # Check which hand is the right hand and which is the left hand
+            if lmList[4][1] < lmList[8][1]:  # Right hand
+                # Control brightness
+                length, img, lineInfo = detector.findDistance(4, 8, img)
+                brightness = np.interp(length, [50, 200], [0, 100])
+                brightness = int(smoothness * round(brightness / smoothness))
+                cv2.putText(img, f'Brightness: {brightness}', (50, 50), cv2.FONT_HERSHEY_COMPLEX,
+                            1, (255, 255, 255), 3)
+                # Adjust your brightness control logic here using the 'brightness' value
+                # Import the `get_brightness` & `set_brightness` functions from the `screen_brightness_control` module
+                from screen_brightness_control import set_brightness, get_brightness
+                # Set the brightness level using the screen_brightness_control module
+                set_brightness(brightness)
 
-            # Find Distance between index and Thumb
-            length, img, lineInfo = detector.findDistance(4, 8, img)
-            # print(length)
-
-            # Convert Volume
-            volPer = np.interp(length, [50, 200], [0, 100])
-
-            # Reduce Resolution to make it smoother
-            smoothness = 5
-            volPer = smoothness * round(volPer / smoothness)
-
-            # Check fingers up
-            fingers = detector.fingersUp()
-            # print(fingers)x
-
-            # If pinky finger is down set volume
-            if not fingers[4]:
-                volume.SetMasterVolumeLevelScalar(volPer / 100, None)
-                cv2.circle(img, (lineInfo[4], lineInfo[5]), 15, (0, 255, 0), cv2.FILLED)
-                colorVol = (0, 255, 0)
-            else:
-                colorVol = (255, 0, 0)
+            else:  # Left hand
+                # Control volume
+                length, img, lineInfo = detector.findDistance(4, 8, img)
+                volPer = np.interp(length, [50, 200], [0, 100])
+                volPer = int(smoothness * round(volPer / smoothness))
+                cv2.putText(img, f'Vol Set: {volPer}', (400, 50), cv2.FONT_HERSHEY_COMPLEX,
+                            1, colorVol, 3)
+                # Adjust your volume control logic here using the 'volPer' value
+                # If pinky finger is down set volume
+                if not detector.fingersUp()[4]:
+                    volume.SetMasterVolumeLevelScalar(volPer / 100, None)
+                    cv2.circle(img, (lineInfo[4], lineInfo[5]), 15, (0, 255, 0), cv2.FILLED)
+                    colorVol = (0, 255, 0)
+                else:
+                    colorVol = (255, 0, 0)
 
     # Drawings
-    cv2.putText(img, f'Vol Set: {int(volPer)}', (400, 50), cv2.FONT_HERSHEY_COMPLEX,
-                1, colorVol, 3)
     cv2.imshow("Detecting", img)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
