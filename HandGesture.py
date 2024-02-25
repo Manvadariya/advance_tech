@@ -3,6 +3,8 @@ import math
 import cv2
 import mediapipe as mp
 from ctypes import cast, POINTER
+
+import numpy as np
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
@@ -69,6 +71,8 @@ volume = cast(interface, POINTER(IAudioEndpointVolume))
 volRange = volume.GetVolumeRange()
 minVol = volRange[0]
 maxVol = volRange[1]
+vol= 0
+volPer=0
 
 cap = cv2.VideoCapture(1)
 cap.set(3, wCam)
@@ -94,8 +98,17 @@ while True:
         length = math.hypot(x2-x1, y2-y1)
         print(length)
 
+        vol = np.interp(length, [50, 300], [minVol, maxVol])
+        volper = np.interp(length, [50, 300], [0, 100])
+
+        print(int(length), vol)
+        volume.SetMasterVolumeLevel(vol, None)
+
+
         if length < 50 :
             cv2.circle(img, (cx, cy), 10, (0, 255, 0), cv2.FILLED)
+
+    cv2.putText(img, f' : {int(volPer)} %', (40, 450), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 0), 2)
 
     cv2.imshow("Detecting", img)
     if cv2.waitKey(1) & 0xFF == ord('q'):
