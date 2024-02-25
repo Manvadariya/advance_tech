@@ -6,14 +6,15 @@ import subprocess
 
 def hand_program():
     window.destroy()
-    subprocess.run(["python", r"HandGesture.py"], shell=True)
+    os.system("HandGesture.py")
 
 def face_program():
     window.destroy()
-    subprocess.run(["python", r"face.py"], shell=True)
+    os.system("face.py")
+
 def ai_program():
     window.destroy()
-    subprocess.run(["python", r"ai.py"], shell=True)
+    os.system("ai.py")
 
 window = CTk()
 window.title("ADVANCE TECHNOLOGY")
@@ -37,8 +38,8 @@ img = PhotoImage(file=image_path)
 image_label = Label(window, image=img)
 image_label.pack()
 
-CTkButton(master=window, text="GET START", width=120, height=30, fg_color="#ac74f9", hover_color="#dc85fc", command=face_program()).place(relx=0.179, rely=0.7)
-CTkButton(master=window, text="GET START", width=120, height=30, fg_color="#ac74f9", hover_color="#dc85fc", command=ai_program()).place(relx=0.705, rely=0.7)
+CTkButton(master=window, text="GET START", width=120, height=30, fg_color="#ac74f9", hover_color="#dc85fc", command=face_program).place(relx=0.179, rely=0.7)
+CTkButton(master=window, text="GET START", width=120, height=30, fg_color="#ac74f9", hover_color="#dc85fc", command=ai_program).place(relx=0.705, rely=0.7)
 CTkButton(master=window, text="GET START", width=140, height=40, fg_color="#ac74f9", hover_color="#dc85fc", command=hand_program).place(relx=0.433, rely=0.73)
 
 window.mainloop()
