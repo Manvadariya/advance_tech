@@ -1,8 +1,10 @@
 # importing necessary modules
 import math
-
 import cv2
 import mediapipe as mp
+from ctypes import cast, POINTER
+from comtypes import CLSCTX_ALL
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
 cap = cv2.VideoCapture(1)  # Set your camera appropriately by changing count Ex: 0
 
@@ -57,6 +59,16 @@ class handDetector():
 wCam, hCam = 640, 480
 
 detector = handDetector(detectionCon=0.7, maxHands=1)
+
+devices = AudioUtilities.GetSpeakers()
+interface = devices.Activate(
+    IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+volume = cast(interface, POINTER(IAudioEndpointVolume))
+# volume.GetMute()
+# volume.GetMasterVolumeLevel()
+volRange = volume.GetVolumeRange()
+minVol = volRange[0]
+maxVol = volRange[1]
 
 cap = cv2.VideoCapture(1)
 cap.set(3, wCam)
