@@ -115,3 +115,6 @@ def main():
         response = get_newest_message(my_thread.id)
         # print("Response:", response.content[0].text.value)
         Speak(response.content[0].text.value)
+
+if __name__ == "__main__":
+    main()
