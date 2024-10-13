@@ -11,7 +11,7 @@ Embark on an innovative journey with our Python project, featuring an Advanced A
 ## Installation
 1. Clone the repository.
 2. Navigate to the project directory.
-3. Run `npm install` to install dependencies.
+3. Run `pip install` to install dependencies.
 
 ## Project 1 : Attendance system with Hand detection 
 
